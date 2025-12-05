@@ -10,8 +10,19 @@ import argparse
 import asyncio
 import sys
 import os
+import shutil
 from dotenv import load_dotenv
 from rich.console import Console
+
+# Auto-generate config.py if missing
+if not os.path.exists("config.py"):
+    if os.path.exists("config_template.py"):
+        print("[!] config.py not found. Creating from config_template.py...")
+        shutil.copy("config_template.py", "config.py")
+        print("[✓] config.py created successfully!")
+    else:
+        print("[ERROR] config_template.py not found! Cannot create config.py")
+        sys.exit(1)
 from rich.panel import Panel
 from modules.banner import show_logo
 from modules.subdomain import SubdomainHunter
@@ -326,6 +337,7 @@ def parse_arguments():
         argparse.Namespace: Parsed arguments
     """
     parser = argparse.ArgumentParser(
+        prog='EYE',
         description='EYE - Automated Attack Surface Manager',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
