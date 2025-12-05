@@ -1,15 +1,15 @@
 """
 EYE - Configuration Template
-Copy this file to config.py and fill in your credentials
+Copy this file to config.py and customize your settings
 """
 
-# Telegram Bot Configuration
-TELEGRAM_BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"
-TELEGRAM_CHAT_ID = "YOUR_CHAT_ID_HERE"
-
-# Shodan API Configuration (Optional)
-SHODAN_API_KEY = "YOUR_SHODAN_API_KEY_HERE"
-
-# Other Configuration
+# Scanning Configuration
 MAX_CONCURRENT_SCANS = 10
 SCAN_TIMEOUT = 30
+
+# Port Scanning
+PORT_LIST = [80, 443, 22, 21, 3306, 8080, 8443]
+PORT_TIMEOUT = 3
+
+# Watcher Mode
+DEFAULT_MONITOR_INTERVAL = 21600  # 6 hours in seconds

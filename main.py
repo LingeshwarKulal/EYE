@@ -16,7 +16,6 @@ from rich.panel import Panel
 from modules.banner import show_logo
 from modules.subdomain import SubdomainHunter
 from modules.scanner import PortScanner
-from modules.notifier import TelegramNotifier
 from modules.fuzzer import SensitiveFileFuzzer
 from modules.harvester import DataHarvester
 from modules.cors import CORSScanner
@@ -349,12 +348,6 @@ Note: This tool is for authorized security testing only.
     )
     
     parser.add_argument(
-        '--alert',
-        action='store_true',
-        help='Enable Telegram alerts for critical findings'
-    )
-    
-    parser.add_argument(
         '--no-fuzz',
         action='store_true',
         help='Skip sensitive file fuzzing'
@@ -376,25 +369,17 @@ Note: This tool is for authorized security testing only.
     return parser.parse_args()
 
 
-async def main(domain, enable_alerts=False, skip_fuzz=False, is_monitoring=False):
+async def main(domain, skip_fuzz=False, is_monitoring=False):
     """
     Main reconnaissance workflow
     
     Args:
         domain (str): Target domain to scan
-        enable_alerts (bool): Enable Telegram notifications
         skip_fuzz (bool): Skip sensitive file fuzzing
         is_monitoring (bool): Whether running in monitoring mode
     """
     # Display banner
     show_logo()
-    
-    # Initialize notifier
-    notifier = None
-    if enable_alerts:
-        notifier = TelegramNotifier()
-        if notifier.enabled:
-            console.print("[+] [green]Telegram alerts enabled[/green]")
     
     # Display target information
     import socket
@@ -420,10 +405,6 @@ async def main(domain, enable_alerts=False, skip_fuzz=False, is_monitoring=False
         border_style="bright_blue"
     ))
     console.print()
-    
-    # Send scan start notification
-    if notifier and notifier.enabled:
-        await notifier.send_scan_start(domain)
     
     # Phase 1: Subdomain Discovery
     console.print("[bold yellow]═══ Phase 1: Subdomain Discovery ═══[/bold yellow]")
@@ -501,15 +482,6 @@ async def main(domain, enable_alerts=False, skip_fuzz=False, is_monitoring=False
     else:
         console.print("[*] [dim]No active hosts for OS detection[/dim]")
     
-    # Check for critical ports and send alerts
-    if notifier and notifier.enabled:
-        for result in scan_results:
-            if result.get('open_ports'):
-                for port in result['open_ports']:
-                    if port in CRITICAL_PORTS:
-                        console.print(f"[red]⚠️  Critical port {port} found on {result['host']}![/red]")
-                        await notifier.send_critical_port_alert(result['host'], port)
-    
     # Get list of active web hosts first
     web_hosts = []
     for result in scan_results:
@@ -546,7 +518,7 @@ async def main(domain, enable_alerts=False, skip_fuzz=False, is_monitoring=False
         
         # Run all scans in parallel for better performance
         results = await asyncio.gather(
-            fuzzer.fuzz_multiple(web_hosts, notifier),
+            fuzzer.fuzz_multiple(web_hosts),
             harvester.harvest_multiple(web_hosts),
             cors_scanner.scan_multiple(web_hosts),
             audit.audit_multiple(web_hosts),
@@ -619,23 +591,6 @@ async def main(domain, enable_alerts=False, skip_fuzz=False, is_monitoring=False
     """
     
     console.print(Panel(summary.strip(), title="[bold]Summary[/bold]", border_style="green"))
-    
-    # Send Telegram summary
-    if notifier and notifier.enabled:
-        stats = {
-            'subdomains': len(subdomains),
-            'active_hosts': active_hosts,
-            'open_ports': total_open_ports,
-            'sensitive_files': len(sensitive_findings),
-            'emails': total_emails,
-            'phones': total_phones,
-            'social_profiles': total_socials,
-            'cors_vulns': len(cors_vulnerabilities),
-            'ssl_warnings': ssl_warnings,
-            'actuators': total_actuators,
-            'bypasses': successful_bypasses
-        }
-        await notifier.send_scan_complete(domain, stats)
     
     # Export data to JSON and CSV (NEW)
     export_data = {
@@ -724,18 +679,18 @@ def run():
         # Check if monitoring mode is enabled
         if args.monitor:
             # Create a wrapper function for the watcher
-            async def scan_wrapper(target, alerts, skip_f):
-                return await main(target, alerts, skip_f, is_monitoring=True)
+            async def scan_wrapper(target, skip_f):
+                return await main(target, skip_f, is_monitoring=True)
             
             # Initialize and run watcher
             async def run_watcher():
                 watcher = AssetWatcher(domain, args.interval)
-                await watcher.monitor_loop(scan_wrapper, domain, args.alert, args.no_fuzz)
+                await watcher.monitor_loop(scan_wrapper, domain, args.no_fuzz)
             
             asyncio.run(run_watcher())
         else:
             # Run normal single scan
-            asyncio.run(main(domain, args.alert, args.no_fuzz))
+            asyncio.run(main(domain, args.no_fuzz))
         
     except KeyboardInterrupt:
         console.print("\n[!] [yellow]Scan interrupted by user[/yellow]")

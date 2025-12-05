@@ -111,13 +111,12 @@ class SensitiveFileFuzzer:
             
             return None
     
-    async def fuzz_multiple(self, urls, notifier=None):
+    async def fuzz_multiple(self, urls):
         """
         Check multiple URLs for sensitive files
         
         Args:
             urls (list): List of URLs to check
-            notifier: Optional TelegramNotifier instance
             
         Returns:
             list: All findings across all URLs
@@ -146,10 +145,6 @@ class SensitiveFileFuzzer:
                         f"[cyan]{finding['url']}[/cyan] "
                         f"(Status: {finding['status']}, Size: {finding['size']})"
                     )
-                    
-                    # Send Telegram alert for critical findings
-                    if notifier and finding['severity'] == 'CRITICAL':
-                        await notifier.send_sensitive_file_alert(url, finding['path'])
         
         self.findings = all_findings
         

@@ -26,7 +26,6 @@ A comprehensive, high-performance reconnaissance framework designed for security
 
 ### Monitoring & Reporting
 - **👁️ Watcher Mode**: Continuous monitoring with change detection
-- **📱 Telegram Integration**: Real-time notifications
 - **📄 Multiple Export Formats**: JSON, CSV, HTML reports
 - **⚡ High Performance**: Fully asynchronous architecture
 
@@ -61,9 +60,10 @@ pip install -r requirements.txt
 ```
 
 ### 3. Configure (Optional)
+For advanced configurations, you can create a config file:
 ```bash
 cp config_template.py config.py
-# Edit config.py with your Telegram credentials if using notifications
+# Edit config.py with your custom settings
 ```
 
 ## 📖 Usage
@@ -132,10 +132,6 @@ EYE/
 Copy `config_template.py` to `config.py` and customize:
 
 ```python
-# Telegram Bot Configuration (Optional)
-TELEGRAM_BOT_TOKEN = "your_bot_token"
-TELEGRAM_CHAT_ID = "your_chat_id"
-
 # Scanning Configuration
 MAX_CONCURRENT_SCANS = 10
 SCAN_TIMEOUT = 30
@@ -163,7 +159,7 @@ PORT_LIST = [80, 443, 22, 21, 3306, 8080]
 - Continuous monitoring
 - Change detection
 - State persistence
-- Telegram alerts
+- Console logging
 
 ### Harvester Module
 - Email extraction with validation
@@ -253,7 +249,6 @@ The author is not responsible for misuse or damage caused by this tool.
 - ✅ Data Harvesting (Email/Phone)
 - ✅ Social Media Profile Discovery
 - ✅ Watcher Mode (Continuous Monitoring)
-- ✅ Telegram Notifications
 - ✅ Multiple Export Formats (JSON/CSV/HTML)
 
 ## 📝 License

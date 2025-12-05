@@ -187,17 +187,13 @@ class AssetWatcher:
         
         return changes
     
-    async def send_change_alert(self, changes: Dict[str, Any], notifier):
+    def log_change_alert(self, changes: Dict[str, Any]):
         """
-        Send alert about detected changes
+        Log detected changes to console
         
         Args:
             changes: Dictionary of detected changes
-            notifier: TelegramNotifier instance
         """
-        if not notifier or not notifier.enabled:
-            return
-        
         if changes.get('is_first_scan'):
             return
         
@@ -209,54 +205,45 @@ class AssetWatcher:
         if not any([new_subdomains, new_ports, removed_subdomains, removed_ports]):
             return
         
-        # Build alert message
-        message = f"🚨 *Infrastructure Changes Detected*\n"
-        message += f"📍 Target: `{self.domain}`\n"
-        message += f"⏰ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+        console.print("\n[bold yellow]🚨 Infrastructure Changes Detected![/bold yellow]")
+        console.print(f"📍 Target: [cyan]{self.domain}[/cyan]")
+        console.print(f"⏰ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
         
         if new_subdomains:
-            message += f"🆕 *New Subdomains ({len(new_subdomains)}):*\n"
-            for subdomain in new_subdomains[:10]:  # Limit to 10
-                message += f"  • `{subdomain}`\n"
+            console.print(f"[green]🆕 New Subdomains ({len(new_subdomains)}):[/green]")
+            for subdomain in new_subdomains[:10]:
+                console.print(f"  • {subdomain}")
             if len(new_subdomains) > 10:
-                message += f"  ... and {len(new_subdomains) - 10} more\n"
-            message += "\n"
+                console.print(f"  ... and {len(new_subdomains) - 10} more")
         
         if new_ports:
-            message += f"🔓 *New Open Ports ({len(new_ports)}):*\n"
-            for item in new_ports[:10]:  # Limit to 10
-                message += f"  • `{item['host']}`: {', '.join(map(str, item['ports']))}\n"
+            console.print(f"\n[green]🔓 New Open Ports ({len(new_ports)}):[/green]")
+            for item in new_ports[:10]:
+                console.print(f"  • {item['host']}: {', '.join(map(str, item['ports']))}")
             if len(new_ports) > 10:
-                message += f"  ... and {len(new_ports) - 10} more\n"
-            message += "\n"
+                console.print(f"  ... and {len(new_ports) - 10} more")
         
         if removed_subdomains:
-            message += f"📉 *Removed Subdomains ({len(removed_subdomains)}):*\n"
+            console.print(f"\n[red]📉 Removed Subdomains ({len(removed_subdomains)}):[/red]")
             for subdomain in removed_subdomains[:5]:
-                message += f"  • `{subdomain}`\n"
+                console.print(f"  • {subdomain}")
             if len(removed_subdomains) > 5:
-                message += f"  ... and {len(removed_subdomains) - 5} more\n"
-            message += "\n"
+                console.print(f"  ... and {len(removed_subdomains) - 5} more")
         
         if removed_ports:
-            message += f"🔒 *Closed Ports ({len(removed_ports)}):*\n"
+            console.print(f"\n[red]🔒 Closed Ports ({len(removed_ports)}):[/red]")
             for item in removed_ports[:5]:
-                message += f"  • `{item['host']}`: {', '.join(map(str, item['ports']))}\n"
+                console.print(f"  • {item['host']}: {', '.join(map(str, item['ports']))}")
             if len(removed_ports) > 5:
-                message += f"  ... and {len(removed_ports) - 5} more\n"
-        
-        # Send alert
-        await notifier.send_message(message)
-        console.print("[+] [green]Change alert sent via Telegram[/green]")
+                console.print(f"  ... and {len(removed_ports) - 5} more")
     
-    async def monitor_loop(self, scan_func: Callable, domain: str, enable_alerts: bool = False, skip_fuzz: bool = False):
+    async def monitor_loop(self, scan_func: Callable, domain: str, skip_fuzz: bool = False):
         """
         Run continuous monitoring loop
         
         Args:
             scan_func: Async function to execute for scanning
             domain: Target domain
-            enable_alerts: Enable Telegram notifications
             skip_fuzz: Skip sensitive file fuzzing
         """
         console.print("\n" + "="*60)
@@ -268,13 +255,6 @@ class AssetWatcher:
         console.print("[*] Press [red]Ctrl+C[/red] to stop monitoring")
         console.print("="*60 + "\n")
         
-        from modules.notifier import TelegramNotifier
-        notifier = None
-        if enable_alerts:
-            notifier = TelegramNotifier()
-            if notifier.enabled:
-                console.print("[+] [green]Telegram alerts enabled for change detection[/green]\n")
-        
         while True:
             try:
                 self.scan_count += 1
@@ -283,7 +263,7 @@ class AssetWatcher:
                 console.print(f"[bold yellow]{'='*60}[/bold yellow]\n")
                 
                 # Run the scan
-                scan_data = await scan_func(domain, enable_alerts, skip_fuzz)
+                scan_data = await scan_func(domain, False, skip_fuzz)
                 
                 # Detect changes
                 console.print(f"\n[bold cyan]{'='*60}[/bold cyan]")
@@ -292,9 +272,9 @@ class AssetWatcher:
                 
                 changes = self.detect_changes(scan_data)
                 
-                # Send alert if changes detected
+                # Log changes if detected
                 if not changes.get('is_first_scan'):
-                    await self.send_change_alert(changes, notifier)
+                    self.log_change_alert(changes)
                 
                 # Save current state
                 self.save_state(scan_data)

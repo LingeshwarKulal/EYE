@@ -25,7 +25,6 @@ wheels/
 .env.local
 
 # Sensitive credential files
-get_chat_id.py
 config.py
 
 # Virtual Environment
