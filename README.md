@@ -59,12 +59,17 @@ cd EYE
 pip install -r requirements.txt
 ```
 
-### 3. Configure (Optional)
-For advanced configurations, you can create a config file:
+### 3. Create Configuration File
+**IMPORTANT**: Create `config.py` from the template (required for the tool to run):
 ```bash
+# Linux/Mac
 cp config_template.py config.py
-# Edit config.py with your custom settings
+
+# Windows
+copy config_template.py config.py
 ```
+
+You can customize scanning parameters in `config.py` if needed (port ranges, timeouts, etc.).
 
 ## 📖 Usage
 
