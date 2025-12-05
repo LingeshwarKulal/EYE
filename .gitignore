@@ -1,0 +1,82 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Environment Variables
+.env
+.env.local
+
+# Sensitive credential files
+get_chat_id.py
+config.py
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Output
+output/
+test_output/
+*.png
+*.jpg
+*.jpeg
+*.csv
+*.log
+
+# Scan results
+scan_results.*
+security_report.*
+screenshots/
+
+# Test files
+test_*.py
+
+# State files
+watcher_state.json
+*.json
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Selenium
+geckodriver.log
+chromedriver.log
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Temporary
+*.tmp
+*.bak
+*.old
