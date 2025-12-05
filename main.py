@@ -3,6 +3,7 @@ EYE - Automated Attack Surface Manager
 Main entry point for the reconnaissance framework
 
 Usage:
+    python eye.py -d example.com
     python main.py -d example.com
 """
 
@@ -342,11 +343,10 @@ def parse_arguments():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python main.py -d example.com
-  python main.py --domain target.com
-  python main.py -d 192.168.1.1
-  python main.py -d example.com --monitor --interval 3600
-  python main.py -d target.com --monitor --alert
+  python eye.py -d example.com
+  python eye.py --domain target.com
+  python eye.py -d 192.168.1.1
+  python eye.py -d example.com --monitor --interval 3600
 
 Note: This tool is for authorized security testing only.
         """

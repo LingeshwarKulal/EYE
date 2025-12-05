@@ -75,19 +75,21 @@ You can customize scanning parameters in `config.py` if needed (port ranges, tim
 
 ### Basic Scan
 ```bash
+python eye.py -d target.com
+# OR
 python main.py -d target.com
 ```
 
 ### Advanced Options
 ```bash
-# With subdomain enumeration
-python main.py -d target.com --subdomains
-
 # Watcher mode (continuous monitoring)
-python main.py -d target.com --watch --interval 3600
+python eye.py -d target.com --monitor --interval 3600
 
-# Export results
-python main.py -d target.com --export json,csv,html
+# Skip sensitive file fuzzing
+python eye.py -d target.com --no-fuzz
+
+# Monitor mode without fuzzing
+python eye.py -d target.com --monitor --no-fuzz
 ```
 
 ### Command-Line Options
